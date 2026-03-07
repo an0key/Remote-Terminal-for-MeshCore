@@ -14,7 +14,7 @@ const BotCodeEditor = lazy(() =>
 
 const TYPE_LABELS: Record<string, string> = {
   mqtt_private: 'Private MQTT',
-  mqtt_community: 'Community MQTT/mesh2mqtt',
+  mqtt_community: 'meshtomqtt/LetsMesh/MeshRank',
   bot: 'Bot',
   webhook: 'Webhook',
   apprise: 'Apprise',
@@ -22,7 +22,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 const TYPE_OPTIONS = [
   { value: 'mqtt_private', label: 'Private MQTT' },
-  { value: 'mqtt_community', label: 'Community MQTT/mesh2mqtt' },
+  { value: 'mqtt_community', label: 'meshtomqtt/LetsMesh/MeshRank' },
   { value: 'bot', label: 'Bot' },
   { value: 'webhook', label: 'Webhook' },
   { value: 'apprise', label: 'Apprise' },

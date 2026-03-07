@@ -84,7 +84,9 @@ describe('SettingsFanoutSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add Integration' }));
 
     expect(screen.getByRole('menuitem', { name: 'Private MQTT' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Community MQTT/mesh2mqtt' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: 'meshtomqtt/LetsMesh/MeshRank' })
+    ).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Webhook' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Apprise' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Bot' })).toBeInTheDocument();
