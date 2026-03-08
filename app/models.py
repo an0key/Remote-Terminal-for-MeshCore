@@ -501,6 +501,16 @@ class ContactActivityCounts(BaseModel):
     last_week: int
 
 
+class PathHashWidthStats(BaseModel):
+    total_packets: int
+    single_byte: int
+    double_byte: int
+    triple_byte: int
+    single_byte_pct: float
+    double_byte_pct: float
+    triple_byte_pct: float
+
+
 class StatisticsResponse(BaseModel):
     busiest_channels_24h: list[BusyChannel]
     contact_count: int
@@ -514,3 +524,4 @@ class StatisticsResponse(BaseModel):
     total_outgoing: int
     contacts_heard: ContactActivityCounts
     repeaters_heard: ContactActivityCounts
+    path_hash_width_24h: PathHashWidthStats

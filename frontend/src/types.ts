@@ -398,4 +398,13 @@ export interface StatisticsResponse {
   total_outgoing: number;
   contacts_heard: ContactActivityCounts;
   repeaters_heard: ContactActivityCounts;
+  path_hash_width_24h: {
+    total_packets: number;
+    single_byte: number;
+    double_byte: number;
+    triple_byte: number;
+    single_byte_pct: number;
+    double_byte_pct: number;
+    triple_byte_pct: number;
+  };
 }
