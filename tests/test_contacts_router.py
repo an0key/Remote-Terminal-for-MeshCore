@@ -215,6 +215,28 @@ class TestAdvertPaths:
         assert data[0]["next_hop"] is None
 
     @pytest.mark.asyncio
+    async def test_get_contact_advert_paths_distinguishes_same_bytes_by_hop_count(
+        self, test_db, client
+    ):
+        repeater_key = KEY_A
+        await _insert_contact(repeater_key, "R1", type=2)
+        await ContactAdvertPathRepository.record_observation(
+            repeater_key, "aa00", 1000, hop_count=1
+        )
+        await ContactAdvertPathRepository.record_observation(
+            repeater_key, "aa00", 1010, hop_count=2
+        )
+
+        response = await client.get(f"/api/contacts/{repeater_key}/advert-paths")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert [(item["path"], item["path_len"], item["next_hop"]) for item in data] == [
+            ("aa00", 2, "aa"),
+            ("aa00", 1, "aa00"),
+        ]
+
+    @pytest.mark.asyncio
     async def test_get_contact_advert_paths_works_for_non_repeater(self, test_db, client):
         await _insert_contact(KEY_A, "Alice", type=1)
 

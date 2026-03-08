@@ -112,7 +112,7 @@ Frontend packet-feed consumers should treat `observation_id` as the dedup/render
 To improve repeater disambiguation in the network visualizer, the backend stores recent unique advertisement paths per contact in a dedicated table (`contact_advert_paths`).
 
 - This is independent of raw-packet payload deduplication.
-- Paths are keyed per contact + path, with `heard_count`, `first_seen`, and `last_seen`.
+- Paths are keyed per contact + path + hop count, with `heard_count`, `first_seen`, and `last_seen`.
 - Only the N most recent unique paths are retained per contact (currently 10).
 - See `frontend/src/components/AGENTS_packet_visualizer.md` § "Advert-Path Identity Hints" for how the visualizer consumes this data.
 

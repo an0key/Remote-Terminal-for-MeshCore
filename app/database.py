@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS contact_advert_paths (
     first_seen INTEGER NOT NULL,
     last_seen INTEGER NOT NULL,
     heard_count INTEGER NOT NULL DEFAULT 1,
-    UNIQUE(public_key, path_hex),
+    UNIQUE(public_key, path_hex, path_len),
     FOREIGN KEY (public_key) REFERENCES contacts(public_key)
 );
 

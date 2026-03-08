@@ -337,9 +337,8 @@ class ContactAdvertPathRepository:
             INSERT INTO contact_advert_paths
                 (public_key, path_hex, path_len, first_seen, last_seen, heard_count)
             VALUES (?, ?, ?, ?, ?, 1)
-            ON CONFLICT(public_key, path_hex) DO UPDATE SET
+            ON CONFLICT(public_key, path_hex, path_len) DO UPDATE SET
                 last_seen = MAX(contact_advert_paths.last_seen, excluded.last_seen),
-                path_len = excluded.path_len,
                 heard_count = contact_advert_paths.heard_count + 1
             """,
             (normalized_key, normalized_path, path_len, timestamp, timestamp),
@@ -350,8 +349,8 @@ class ContactAdvertPathRepository:
             """
             DELETE FROM contact_advert_paths
             WHERE public_key = ?
-              AND path_hex NOT IN (
-                  SELECT path_hex
+              AND id NOT IN (
+                  SELECT id
                   FROM contact_advert_paths
                   WHERE public_key = ?
                   ORDER BY last_seen DESC, heard_count DESC, path_len ASC, path_hex ASC
