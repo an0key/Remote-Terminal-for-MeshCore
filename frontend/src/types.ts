@@ -150,10 +150,12 @@ export interface ChannelDetail {
 
 /** A single path that a message took to reach us */
 export interface MessagePath {
-  /** Hex-encoded routing path (2 chars per hop) */
+  /** Hex-encoded routing path */
   path: string;
   /** Unix timestamp when this path was received */
   received_at: number;
+  /** Hop count (number of intermediate nodes). Null for legacy data (infer as len(path)/2). */
+  path_len?: number | null;
 }
 
 export interface Message {

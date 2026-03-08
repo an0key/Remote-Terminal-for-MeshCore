@@ -2,7 +2,7 @@ import type { Contact, RadioConfig, MessagePath } from '../types';
 import { CONTACT_TYPE_REPEATER } from '../types';
 
 export interface PathHop {
-  prefix: string; // 2-char hex prefix (e.g., "1A")
+  prefix: string; // Hex hop identifier (e.g., "1A" for 1-byte, "1A2B" for 2-byte)
   matches: Contact[]; // Matched repeaters (empty=unknown, multiple=ambiguous)
   distanceFromPrev: number | null; // km from previous hop
 }
@@ -30,20 +30,35 @@ export interface SenderInfo {
 }
 
 /**
- * Split hex string into 2-char hops
+ * Split hex path string into per-hop chunks.
+ *
+ * When hopCount is provided (from path_len metadata), the bytes-per-hop is
+ * derived from the hex length divided by the hop count. This correctly handles
+ * multi-byte hop identifiers (1, 2, or 3 bytes per hop).
+ *
+ * Falls back to 2-char (1-byte) chunks when hopCount is missing or doesn't
+ * divide evenly — matching legacy behavior.
  */
-export function parsePathHops(path: string | null | undefined): string[] {
+export function parsePathHops(path: string | null | undefined, hopCount?: number | null): string[] {
   if (!path || path.length === 0) {
     return [];
   }
 
   const normalized = path.toUpperCase();
-  const hops: string[] = [];
 
-  for (let i = 0; i < normalized.length; i += 2) {
-    if (i + 1 < normalized.length) {
-      hops.push(normalized.slice(i, i + 2));
+  // Derive chars-per-hop from metadata when available
+  let charsPerHop = 2; // default: 1-byte hops
+  if (hopCount && hopCount > 0) {
+    const derived = normalized.length / hopCount;
+    // Accept only valid even widths (2, 4, 6) that divide evenly
+    if (derived >= 2 && derived % 2 === 0 && derived * hopCount === normalized.length) {
+      charsPerHop = derived;
     }
+  }
+
+  const hops: string[] = [];
+  for (let i = 0; i + charsPerHop <= normalized.length; i += charsPerHop) {
+    hops.push(normalized.slice(i, i + charsPerHop));
   }
 
   return hops;
@@ -146,12 +161,16 @@ function sortContactsByDistance(
 }
 
 /**
- * Get simple hop count from path string
+ * Get hop count from path, using explicit metadata when available.
  */
-function getHopCount(path: string | null | undefined): number {
+function getHopCount(path: string | null | undefined, hopCount?: number | null): number {
+  if (hopCount != null && hopCount >= 0) {
+    return hopCount;
+  }
   if (!path || path.length === 0) {
     return 0;
   }
+  // Legacy fallback: assume 1-byte (2 hex chars) per hop
   return Math.floor(path.length / 2);
 }
 
@@ -170,7 +189,7 @@ export function formatHopCounts(paths: MessagePath[] | null | undefined): {
   }
 
   // Get hop counts for all paths and sort ascending
-  const hopCounts = paths.map((p) => getHopCount(p.path)).sort((a, b) => a - b);
+  const hopCounts = paths.map((p) => getHopCount(p.path, p.path_len)).sort((a, b) => a - b);
 
   const allDirect = hopCounts.every((h) => h === 0);
   const hasMultiple = paths.length > 1;
@@ -189,9 +208,10 @@ export function resolvePath(
   path: string | null | undefined,
   sender: SenderInfo,
   contacts: Contact[],
-  config: RadioConfig | null
+  config: RadioConfig | null,
+  hopCount?: number | null
 ): ResolvedPath {
-  const hopPrefixes = parsePathHops(path);
+  const hopPrefixes = parsePathHops(path, hopCount);
 
   // Build sender info
   const senderPrefix = sender.publicKeyOrPrefix.toUpperCase().slice(0, 2);
